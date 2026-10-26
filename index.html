@@ -436,8 +436,6 @@ button.control:hover { border-color: var(--border-hover); }
 
   function flowHTML() {
     const general = state.general[0];
-    const missing = Object.keys(PLATFORMS).filter(p => p !== 'pwa' && !state.order.includes(p)).map(p => PLATFORMS[p].label);
-
     const cols = state.order.map(p => {
       const list = state.apps[p];
       const total = list.length;
@@ -460,12 +458,6 @@ button.control:hover { border-color: var(--border-hover); }
       </div>`;
     });
 
-    cols.push(`<div class="fcol is-other">
-      ${arrow()}
-      <div class="fnode is-soft">Другие<small>${missing.length ? 'десктоп, ' + missing.join(', ') : 'десктоп, прочие ОС'}</small></div>
-      ${arrow()}
-      <div class="fnode is-soft">Whitepage воронки</div>
-    </div>`);
 
     return `
       <div class="fnode is-key">Клик по ссылке воронки</div>
