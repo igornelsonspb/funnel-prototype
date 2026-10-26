@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu+Sans:wght@500&display=swap">
 <style>
-/* Layout: Click Kings app shell (225px sidebar + header) with the 800px "Создание воронки" form; platform blocks render from state, app settings open in a right-hand drawer. */
+/* Layout: Click Kings app shell (225px sidebar + header) with the 800px "Создание воронки" form; platform blocks and reserve panels render from state, all settings live inside the app cards. */
 :root {
   color-scheme: dark;
   --primary: #141728;
@@ -19,21 +19,18 @@
   --dark-grey: #2e3249;
   --tab-active: #333851;
   --grey: #3a3e59;
+  --border-on-table: #44485f;
   --border-hover: #6d718a;
   --fg: #ffffff;
   --text-default: #9498af;
   --text-disabled: #616681;
   --accent: #3efe90;
-  --drafted: #ffbb00;
   --required: #f04040;
-  --scrim: rgba(0, 0, 0, 0.5);
   --font: "Ubuntu Sans", "Ubuntu", "Segoe UI", system-ui, sans-serif;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --header-h: 90px;
 }
 html, body { background: var(--primary); }
 body { color: var(--fg); font: 500 14px/1.3 var(--font); }
-body.is-locked { overflow: hidden; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 img { display: block; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -57,7 +54,7 @@ img { display: block; }
 
 /* ---------- header ---------- */
 .main { min-width: 0; display: flex; flex-direction: column; }
-.topbar { position: sticky; top: 0; z-index: 5; height: var(--header-h); box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 24px 40px; background: var(--primary); }
+.topbar { position: sticky; top: 0; z-index: 5; height: 90px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 24px 40px; background: var(--primary); }
 .topbar h1 { margin: 0; font-size: 20px; line-height: 1.3; font-weight: 500; }
 .topbar-right { display: flex; align-items: center; gap: 12px; }
 .balance { font-size: 20px; }
@@ -70,14 +67,18 @@ img { display: block; }
 .form { width: min(800px, 100%); margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 .card { background: var(--table-bg); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 24px; }
 .card h2 { margin: 0; font-size: 18px; line-height: 1.3; font-weight: 500; }
-.field { display: flex; flex-direction: column; gap: 8px; }
+.card-head { display: flex; flex-direction: column; gap: 8px; }
+.card-head p { margin: 0; color: var(--text-default); font-size: 14px; }
+.field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .field > .label { font-size: 14px; color: var(--fg); }
 .req { color: var(--required); }
 .control { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; background: var(--table-header); border: 1px solid var(--table-header); color: var(--text-default); font-size: 14px; line-height: 1.3; width: 100%; box-sizing: border-box; text-align: left; }
-.control input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: var(--fg); font: inherit; padding: 0; }
+.control.is-filled { color: var(--fg); }
+.control.on-table { border-color: var(--border-on-table); }
+.control input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: var(--fg); font: inherit; padding: 0; text-overflow: ellipsis; }
 .control input::placeholder { color: var(--text-default); }
 .control:focus-within { border-color: var(--border-hover); }
-.control .grow { flex: 1; min-width: 0; }
+.control .grow { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .control img { width: 16px; height: 16px; flex: none; }
 button.control:hover { border-color: var(--border-hover); }
 .dropdown-add:hover { border-color: var(--accent); }
@@ -98,89 +99,76 @@ button.control:hover { border-color: var(--border-hover); }
 .switch[aria-checked="true"] { background: var(--accent); }
 .switch[aria-checked="true"]::before { transform: translateX(27px); }
 
-.platform-tabs { display: inline-flex; align-self: flex-start; background: var(--table-header); border-radius: 8px; }
-.platform-tab { padding: 12px 24px; border-radius: 8px; color: var(--text-default); font-size: 14px; }
-.platform-tab[aria-selected="true"] { background: var(--tab-active); color: var(--fg); }
+/* platform tabs with icons (one mask icon per platform, tinted by state) */
+.ptabs { display: inline-flex; align-self: flex-start; max-width: 100%; background: var(--table-header); border-radius: 8px; }
+.ptab { display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 8px; color: var(--text-default); font-size: 14px; white-space: nowrap; }
+.ptab[aria-selected="true"] { background: var(--tab-active); color: var(--fg); }
+.ptab:hover:not([aria-selected="true"]) { color: var(--fg); }
+.mi { display: block; flex: none; width: 16px; height: 16px; background: currentColor; -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; }
+.mi-pwa { --m: url("assets/v2Pwa16.svg"); }
+.mi-ios { --m: url("assets/v2Apple16.svg"); }
+.mi-android { --m: url("assets/v2Android16.svg"); }
 
 .actions-card { padding: 24px; display: flex; justify-content: flex-end; }
-.actions-card .btn-primary { flex: none; width: auto; }
 .btn-primary { height: 42px; padding: 0 16px; border-radius: 8px; background: var(--accent); color: #000; font-size: 14px; white-space: nowrap; }
 .btn-primary:hover { filter: brightness(1.06); }
-.btn-secondary { height: 42px; padding: 0 16px; border-radius: 8px; background: var(--table-header); color: var(--fg); font-size: 14px; white-space: nowrap; }
-.btn-secondary:hover { background: var(--dark-grey); }
 
 /* ---------- platform blocks ---------- */
 .platforms { display: flex; flex-direction: column; gap: 16px; }
 .platforms:empty { display: none; }
-.platform { background: var(--block); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 16px; animation: rise 0.45s var(--ease); }
-.platform-head { display: flex; align-items: center; justify-content: space-between; font-size: 16px; line-height: 1.5; }
+.platform { background: var(--block); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 24px; animation: rise 0.45s var(--ease); }
+.platform-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.platform-title { display: flex; align-items: center; gap: 8px; font-size: 24px; line-height: 1.3; }
+.platform-title .mi { width: 32px; height: 32px; color: var(--fg); }
 .icon-btn { width: 42px; height: 42px; border-radius: 8px; background: var(--table-header); display: grid; place-items: center; flex: none; }
 .icon-btn img { width: 16px; height: 16px; }
 .icon-btn:hover { background: var(--dark-grey); }
+.platform-body { display: flex; flex-direction: column; gap: 16px; }
 .apps { display: flex; flex-direction: column; gap: 12px; }
 .apps > .label { font-size: 14px; }
-.app-row { background: var(--table-header); border-radius: 12px; padding: 12px; display: flex; gap: 12px; animation: rise 0.45s var(--ease); }
 @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
-.card-app { position: relative; width: 145px; height: 146px; border-radius: 12px; overflow: hidden; flex: none; }
-.card-app > img { width: 100%; height: 100%; object-fit: cover; }
-.card-app .name { position: absolute; left: 0; right: 0; bottom: 0; padding: 10px; background: rgba(0, 0, 0, 0.1); backdrop-filter: blur(7.5px); -webkit-backdrop-filter: blur(7.5px); font-size: 14px; line-height: 1.3; }
-.card-app .tag { position: absolute; left: 8px; top: 8px; display: flex; align-items: center; gap: 4px; padding: 2px 4px; border-radius: 8px; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); font-size: 12px; }
-.card-app .tag img { width: 12px; height: 12px; }
-
-.app-info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; }
-.app-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+/* app card: name + weight + delete on top, preview and its settings side by side */
+.app-card { background: var(--table-header); border-radius: 8px; padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 12px; animation: rise 0.45s var(--ease); }
+.app-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 42px; }
+.app-name { font-size: 16px; line-height: 1.3; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app-tools { display: flex; align-items: center; gap: 24px; flex: none; }
 .weight { display: flex; gap: 12px; padding: 12px; border-radius: 8px; background: var(--block); font-size: 14px; white-space: nowrap; }
 .weight span:first-child { color: var(--text-disabled); }
 .weight.is-hidden { visibility: hidden; }
-.app-btns { display: flex; align-items: center; gap: 16px; }
-.btn-outline { height: 34px; padding: 0 16px; border-radius: 8px; border: 1px solid var(--accent); color: var(--accent); font-size: 14px; white-space: nowrap; transition: background-color 0.2s ease; }
-.btn-outline:hover { background: rgba(62, 254, 144, 0.08); }
 .del { width: 24px; height: 24px; flex: none; }
 .del img { width: 24px; height: 24px; }
 .del:hover img { filter: brightness(1.5); }
-.app-rows { display: flex; flex-direction: column; gap: 12px; }
-.info { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px; border-radius: 8px; background: var(--dark-grey); font-size: 14px; min-width: 0; }
-.info .pair { display: flex; gap: 8px; min-width: 0; white-space: nowrap; }
-.info .val { color: var(--text-default); overflow: hidden; text-overflow: ellipsis; }
-.info .val.is-warn { color: var(--drafted); }
-.info .eye { width: 16px; height: 16px; flex: none; }
-.info .eye img { width: 16px; height: 16px; }
+.app-body { display: flex; align-items: center; gap: 16px; }
+.preview { position: relative; width: 152px; height: 152px; border-radius: 4px; overflow: hidden; flex: none; }
+.preview > img { width: 100%; height: 100%; object-fit: cover; }
+.preview .tag { position: absolute; left: 8px; top: 8px; display: flex; align-items: center; gap: 4px; padding: 2px 4px; border-radius: 8px; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); font-size: 12px; color: var(--fg); }
+.preview .tag .mi { width: 12px; height: 12px; }
+.app-settings { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
 
-/* ---------- drawer ---------- */
-.scrim { position: fixed; left: 225px; right: 0; top: var(--header-h); bottom: 0; background: var(--scrim); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 8; }
-.scrim.is-open { opacity: 1; pointer-events: auto; }
-.drawer { position: fixed; right: 0; top: var(--header-h); bottom: 0; width: min(560px, 100%); box-sizing: border-box; background: var(--table-bg); border-radius: 16px 0 0 16px; padding: 24px; padding-right: max(24px, env(safe-area-inset-right, 0px)); padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 24px; overflow-y: auto; z-index: 9; transform: translateX(100%); visibility: hidden; transition: transform 0.45s var(--ease), visibility 0s linear 0.45s; }
-.drawer.is-open { transform: none; visibility: visible; transition: transform 0.45s var(--ease), visibility 0s; }
-.drawer h2 { margin: 0; font-size: 18px; line-height: 1.3; font-weight: 500; }
-.drawer-card { background: var(--block); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 24px; }
-.drawer-card h3 { margin: 0; font-size: 16px; line-height: 1.5; font-weight: 500; }
-.reserve-list { display: flex; flex-direction: column; gap: 8px; }
-.reserve-list:empty::after { content: "Пока пусто — добавьте приложение выше"; color: var(--text-default); font-size: 14px; }
-.reserve-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 24px 8px 8px; border-radius: 8px; background: var(--table-header); animation: rise 0.35s var(--ease); }
-.reserve-item .who { display: flex; align-items: center; gap: 12px; }
-.reserve-img { position: relative; width: 60px; height: 60px; border-radius: 8px; overflow: hidden; flex: none; }
-.reserve-img > img { width: 100%; height: 100%; object-fit: cover; }
-.reserve-img .badge { position: absolute; left: 0; top: 0; width: 24px; height: 24px; background: var(--table-header); border-radius: 8px 0 8px 0; display: grid; place-items: center; }
-.reserve-img .badge img { width: 16px; height: 16px; }
-.drawer-actions { display: flex; justify-content: flex-end; gap: 16px; }
+/* PWA reserve panel */
+.reserve { border: 1px solid var(--border-on-table); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 24px; }
+.reserve-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 16px; line-height: 1.5; }
+.reserve-body { display: flex; flex-direction: column; gap: 24px; animation: rise 0.4s var(--ease); }
+.reserve-apps { display: flex; flex-direction: column; gap: 12px; }
+.reserve-apps:empty { display: none; }
+.general-apps:empty { display: none; }
 
 /* ---------- responsive ---------- */
 @media (max-width: 960px) {
   .app { grid-template-columns: minmax(0, 1fr); }
   .sidebar { display: none; }
-  .scrim { left: 0; }
 }
 @media (max-width: 640px) {
-  :root { --header-h: 72px; }
-  .topbar { padding: 16px max(16px, env(safe-area-inset-right, 0px)) 16px max(16px, env(safe-area-inset-left, 0px)); }
+  .topbar { height: 72px; padding: 16px max(16px, env(safe-area-inset-right, 0px)) 16px max(16px, env(safe-area-inset-left, 0px)); }
   .topbar .balance, .topbar .ws { display: none; }
   .content { padding-block: 16px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   .card, .platform { padding: 16px; }
   .domain-tabs { flex-direction: column; }
-  .app-row { flex-direction: column; }
-  .card-app { width: 100%; height: 180px; }
-  .drawer { border-radius: 16px 16px 0 0; top: auto; max-height: calc(100% - 48px); width: 100%; transform: translateY(100%); padding: 16px; }
+  .ptab { padding: 12px 14px; }
+  .app-body { flex-direction: column; align-items: stretch; }
+  .preview { width: 100%; height: 200px; }
+  .app-tools { gap: 12px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before { animation: none !important; transition-duration: 0.01ms !important; }
@@ -258,21 +246,30 @@ button.control:hover { border-color: var(--border-hover); }
         <section class="card">
           <h2>Пуши</h2>
           <div class="field"><span class="label">Настроить пуши</span>
-            <button class="control" type="button"><span class="grow">Выберите пуши</span><img class="chev-down" src="assets/imgRemixicon2.svg" alt=""></button></div>
+            <button class="control is-filled" type="button"><span class="grow">Дефолтные пуши</span><img class="chev-down" src="assets/imgRemixicon2.svg" alt=""></button></div>
         </section>
 
         <section class="card">
           <h2>Добавить приложение</h2>
           <div class="field"><span class="label">Выберите платформу</span>
-            <div class="platform-tabs" role="tablist" aria-label="Платформа">
-              <button class="platform-tab" type="button" role="tab" data-platform="pwa" aria-selected="false">PWA</button>
-              <button class="platform-tab" type="button" role="tab" data-platform="ios" aria-selected="true">iOS</button>
-              <button class="platform-tab" type="button" role="tab" data-platform="android" aria-selected="false">Android</button>
-            </div>
+            <div class="ptabs" role="tablist" aria-label="Платформа" data-scope="main"></div>
           </div>
-          <div class="field"><span class="label" id="add-label">Добавить iOS в воронку</span>
-            <button class="control dropdown-add" id="btn-add" type="button" aria-describedby="add-label"><span class="grow" id="add-placeholder">Выберите iOS приложение</span><img class="chev-down" src="assets/imgRemixicon2.svg" alt=""></button></div>
+          <div class="field"><span class="label" data-add-label="main">Добавить iOS в воронку</span>
+            <button class="control dropdown-add" type="button" data-act="add-app"><span class="grow" data-add-ph="main">Выберите iOS приложение</span><img class="chev-down" src="assets/imgRemixicon2.svg" alt=""></button></div>
           <div class="platforms" id="platforms"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h2>Резервное приложение</h2>
+            <p>Общее резервное приложение для воронки</p>
+          </div>
+          <div class="field"><span class="label">Выберите платформу</span>
+            <div class="ptabs" role="tablist" aria-label="Платформа резервного приложения" data-scope="general"></div>
+          </div>
+          <div class="field"><span class="label" data-add-label="general">Добавить iOS в воронку</span>
+            <button class="control dropdown-add" type="button" data-act="add-general"><span class="grow" data-add-ph="general">Выберите iOS приложение</span><img class="chev-down" src="assets/imgRemixicon2.svg" alt=""></button></div>
+          <div class="general-apps" id="general-apps"></div>
         </section>
 
         <section class="card actions-card">
@@ -283,189 +280,191 @@ button.control:hover { border-color: var(--border-hover); }
   </div>
 </div>
 
-<div class="scrim" id="scrim"></div>
-<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
-  <h2 id="drawer-title">Настройка приложения Слот: Coin Strike</h2>
-  <section class="drawer-card">
-    <h3>PWA резерв</h3>
-    <div class="field"><span class="label" id="d-add-label">Добавить iOS приложение</span>
-      <button class="control dropdown-add" id="d-add" type="button"><span class="grow" id="d-add-placeholder">Выберите iOS приложение</span><img class="chev-down" src="assets/imgRemixicon2.svg" alt=""></button></div>
-    <div class="field"><span class="label">Приложения в платформе</span>
-      <div class="reserve-list" id="reserve-list"></div></div>
-  </section>
-  <section class="drawer-card">
-    <h3>Offerlink</h3>
-    <label class="field"><span class="label">Ссылка на трекер/оффер</span>
-      <span class="control"><input id="d-offer" type="text" placeholder="Введите ссылку"></span></label>
-  </section>
-  <div class="field"><span class="label">Настроить пиксель</span>
-    <button class="control" type="button"><span class="grow">Выберите пиксель</span><img class="chev-down" src="assets/imgRemixicon2.svg" alt=""></button></div>
-  <div class="drawer-actions">
-    <button class="btn-secondary" id="d-cancel" type="button">Отменить</button>
-    <button class="btn-primary" id="d-save" type="button">Сохранить</button>
-  </div>
-</aside>
-
 <script>
 (() => {
   const PLATFORMS = {
-    pwa:     { label: 'PWA',     tag: null,                         badge: null },
-    ios:     { label: 'iOS',     tag: 'assets/imgApple.svg',        badge: 'assets/imgDrawerApple.svg' },
-    android: { label: 'Android', tag: 'assets/imgAndroidWhite.svg', badge: 'assets/imgAndroidWhite.svg' },
+    pwa:     { label: 'PWA' },
+    ios:     { label: 'iOS' },
+    android: { label: 'Android' },
   };
-  const APP_NAME = 'Слот: Coin Strike super Strike';
-  const SHORT_NAME = 'Слот: Coin Strike';
+  // the apps that appear, in order, as on the mockups
+  const CATALOG = {
+    ios:     [['Слот: Gate of olympus', 'assets/v2Gate.jpg'], ['Слот: Joker', 'assets/v2Joker.jpg'], ['Слот: Coin Strike', 'assets/v2Coin.jpg'], ['Слот: 3Piggy Pots', 'assets/v2Piggy.jpg']],
+    android: [['Слот: 3Piggy Pots', 'assets/v2Piggy.jpg'], ['Слот: Joker', 'assets/v2Joker.jpg'], ['Слот: Gate of olympus', 'assets/v2Gate.jpg'], ['Слот: Coin Strike', 'assets/v2Coin.jpg']],
+    pwa:     [['Слот: Coin Strike', 'assets/v2Coin.jpg'], ['Слот: Gate of olympus', 'assets/v2Gate.jpg'], ['Слот: Joker', 'assets/v2Joker.jpg'], ['Слот: 3Piggy Pots', 'assets/v2Piggy.jpg']],
+  };
+  const RESERVE_CATALOG = {
+    ios:     [['Слот: Coin Strike', 'assets/v2Coin.jpg'], ['Слот: Joker', 'assets/v2Joker.jpg'], ['Слот: Gate of olympus', 'assets/v2Gate.jpg']],
+    android: [['Слот: 3Piggy Pots', 'assets/v2Piggy.jpg'], ['Слот: Coin Strike', 'assets/v2Coin.jpg'], ['Слот: Joker', 'assets/v2Joker.jpg']],
+    pwa:     [['Слот: Coin Strike', 'assets/v2Coin.jpg'], ['Слот: Gate of olympus', 'assets/v2Gate.jpg'], ['Слот: Joker', 'assets/v2Joker.jpg']],
+  };
   const DEMO_OFFER = 'https://23jan.g5tal.online/?{exid}';
+  const MAX = 10;
 
-  const state = { tab: 'ios', order: [], apps: { pwa: [], ios: [], android: [] } };
   let seq = 0;
-  let editing = null;          // { platform, id }
-  let draftReserve = [];
+  const make = (platform, [name, img]) => ({ id: ++seq, platform, name, img, offer: '', isNew: true });
+  const state = {
+    tabs: { main: 'ios', general: 'ios' },      // + one entry per reserve panel: 'r-<platform>'
+    order: [],
+    apps: { pwa: [], ios: [], android: [] },
+    reserve: {},                                 // platform -> { open, apps: [] }
+    general: [],
+  };
+  const counters = {};
+  const nextFrom = (catalog, key, platform) => { counters[key] = (counters[key] || 0); const item = catalog[platform][counters[key] % catalog[platform].length]; counters[key]++; return item; };
 
-  const $ = id => document.getElementById(id);
+  const $ = s => document.querySelector(s);
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-  const plural = n => n % 10 === 1 && n % 100 !== 11 ? 'приложение' : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 'приложения' : 'приложений');
+  const chevron = '<img class="chev-down" src="assets/imgRemixicon2.svg" alt="">';
 
-  /* ---------- platform tabs ---------- */
-  function setTab(p) {
-    state.tab = p;
-    document.querySelectorAll('.platform-tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.platform === p)));
-    const l = PLATFORMS[p].label;
-    $('add-label').textContent = `Добавить ${l} в воронку`;
-    $('add-placeholder').textContent = `Выберите ${l} приложение`;
+  /* ---------- pieces ---------- */
+  function tabsHTML(scope) {
+    const cur = state.tabs[scope];
+    return Object.keys(PLATFORMS).map(p => `<button class="ptab" type="button" role="tab" data-act="tab" data-scope="${scope}" data-p="${p}" aria-selected="${p === cur}"><span class="mi mi-${p}"></span>${PLATFORMS[p].label}</button>`).join('');
   }
-  document.querySelectorAll('.platform-tab').forEach(t => t.addEventListener('click', () => setTab(t.dataset.platform)));
-
-  /* ---------- add app (screens 02, 03, 05) ---------- */
-  $('btn-add').addEventListener('click', () => {
-    const p = state.tab;
-    const list = state.apps[p];
-    if (list.length >= 10) return;
-    if (!state.order.includes(p)) state.order.push(p);
-    // screen 03: once a second app arrives, the first one is shown configured
-    if (list.length === 1 && list[0].reserve === 0 && !list[0].offer) { list[0].reserve = 2; list[0].offer = DEMO_OFFER; }
-    list.push({ id: ++seq, reserve: 0, offer: '', isNew: true });
-    render();
-  });
-
-  /* ---------- render ---------- */
-  function appRow(p, a, count) {
-    const cfg = PLATFORMS[p];
-    const weight = Math.round(100 / count);
-    const tag = cfg.tag ? `<span class="tag"><img src="${cfg.tag}" alt="">${cfg.label}</span>` : `<span class="tag">${cfg.label}</span>`;
-    const reserve = a.reserve > 0 ? `<span class="val">${a.reserve} ${plural(a.reserve)}</span>` : '<span class="val is-warn">требует настройки</span>';
-    const offer = a.offer ? `<span class="val">${esc(a.offer)}</span>` : '<span class="val is-warn">не добавлен</span>';
-    return `<div class="app-row" data-id="${a.id}" style="${a.isNew ? '' : 'animation:none'}">
-      <div class="card-app"><img src="assets/app.png" alt="">${tag}<span class="name">${APP_NAME}</span></div>
-      <div class="app-info">
-        <div class="app-top">
-          <span class="weight${count > 1 ? '' : ' is-hidden'}"><span>Вес,%</span><span>${weight}</span></span>
-          <span class="app-btns">
-            <button class="btn-outline" type="button" data-act="setup" data-p="${p}" data-id="${a.id}">Настроить</button>
-            <button class="del" type="button" data-act="del" data-p="${p}" data-id="${a.id}" aria-label="Удалить приложение"><img src="assets/imgDelete.svg" alt=""></button>
-          </span>
+  function addFieldHTML(scope, act, extra = '') {
+    const l = PLATFORMS[state.tabs[scope]].label;
+    return `<div class="field"><span class="label">Добавить ${l} в воронку</span>
+      <button class="control dropdown-add" type="button" data-act="${act}" ${extra}><span class="grow">Выберите ${l} приложение</span>${chevron}</button></div>`;
+  }
+  function appCardHTML(a, { weight = null, owner = '' } = {}) {
+    const w = weight === null ? '<span class="weight is-hidden" aria-hidden="true"><span>Вес,%</span><span>50</span></span>'
+                              : `<span class="weight"><span>Вес,%</span><span>${weight}</span></span>`;
+    return `<article class="app-card" style="${a.isNew ? '' : 'animation:none'}">
+      <div class="app-top">
+        <span class="app-name">${esc(a.name)}</span>
+        <span class="app-tools">${w}
+          <button class="del" type="button" data-act="del" data-owner="${owner}" data-id="${a.id}" aria-label="Удалить ${esc(a.name)}"><img src="assets/v2Delete.svg" alt=""></button>
+        </span>
+      </div>
+      <div class="app-body">
+        <div class="preview"><img src="${a.img}" alt=""><span class="tag"><span class="mi mi-${a.platform}"></span>${PLATFORMS[a.platform].label}</span></div>
+        <div class="app-settings">
+          <label class="field"><span class="label">Offerlink</span>
+            <span class="control on-table"><input type="text" data-act="offer" data-owner="${owner}" data-id="${a.id}" value="${esc(a.offer)}" placeholder="Введите ссылка на трекер/оффер"></span></label>
+          <div class="field"><span class="label">Настроить пиксель</span>
+            <button class="control on-table" type="button"><span class="grow">Выберите пиксель</span>${chevron}</button></div>
         </div>
-        <div class="app-rows">
-          <div class="info"><span class="pair"><span>PWA резерв:</span>${reserve}</span>
-            <button class="eye" type="button" data-act="setup" data-p="${p}" data-id="${a.id}" aria-label="Посмотреть резерв"><img src="assets/imgEye.svg" alt=""></button></div>
-          <div class="info"><span class="pair"><span>Offerlink</span>${offer}</span></div>
-        </div>
+      </div>
+    </article>`;
+  }
+  function reserveHTML(p) {
+    const r = state.reserve[p];
+    if (!r.open) {
+      return `<div class="reserve"><div class="reserve-head"><span>PWA резерв</span>
+        <button class="icon-btn" type="button" data-act="reserve-open" data-p="${p}" aria-label="Добавить PWA резерв"><img src="assets/v2Plus.svg" alt=""></button></div></div>`;
+    }
+    const scope = 'r-' + p;
+    return `<div class="reserve">
+      <div class="reserve-head"><span>PWA резерв</span>
+        <button class="icon-btn" type="button" data-act="reserve-close" data-p="${p}" aria-label="Убрать PWA резерв"><img src="assets/v2Cancel.svg" alt=""></button></div>
+      <div class="reserve-body" style="${r.isNew ? '' : 'animation:none'}">
+        <div class="field"><span class="label">Выберите платформу</span><div class="ptabs" role="tablist">${tabsHTML(scope)}</div></div>
+        ${addFieldHTML(scope, 'add-reserve', `data-p="${p}"`)}
+        <div class="reserve-apps">${r.apps.map(a => appCardHTML(a, { owner: 'r-' + p })).join('')}</div>
       </div>
     </div>`;
   }
 
+  /* ---------- render ---------- */
   function render() {
-    const wrap = $('platforms');
-    const prev = new Set([...wrap.querySelectorAll('.platform')].map(n => n.dataset.p));
-    wrap.innerHTML = state.order.map(p => {
+    const prev = new Set([...document.querySelectorAll('#platforms .platform')].map(n => n.dataset.p));
+    $('#platforms').innerHTML = state.order.map(p => {
       const list = state.apps[p];
+      const weight = list.length > 1 ? Math.round(100 / list.length) : null;
       return `<section class="platform" data-p="${p}" style="${prev.has(p) ? 'animation:none' : ''}">
-        <div class="platform-head"><span>${PLATFORMS[p].label}</span>
-          <button class="icon-btn" type="button" data-act="close" data-p="${p}" aria-label="Убрать платформу ${PLATFORMS[p].label}"><img src="assets/imgCancel.svg" alt=""></button></div>
-        <div class="apps"><span class="label">Приложения в платформе</span>
-          ${list.map(a => appRow(p, a, list.length)).join('')}</div>
+        <div class="platform-head">
+          <span class="platform-title"><span class="mi mi-${p}"></span>${PLATFORMS[p].label}</span>
+          <button class="icon-btn" type="button" data-act="close-platform" data-p="${p}" aria-label="Убрать платформу ${PLATFORMS[p].label}"><img src="assets/v2Cancel.svg" alt=""></button>
+        </div>
+        <div class="platform-body">
+          <div class="apps"><span class="label">Приложения в платформе</span>
+            ${list.map(a => appCardHTML(a, { weight, owner: p })).join('')}</div>
+          ${reserveHTML(p)}
+        </div>
       </section>`;
     }).join('');
-    Object.values(state.apps).flat().forEach(a => { a.isNew = false; });
+    $('#general-apps').innerHTML = state.general.map(a => appCardHTML(a, { owner: 'general' })).join('');
+
+    for (const scope of ['main', 'general']) {
+      $(`.ptabs[data-scope="${scope}"]`).innerHTML = tabsHTML(scope);
+      const l = PLATFORMS[state.tabs[scope]].label;
+      $(`[data-add-label="${scope}"]`).textContent = `Добавить ${l} в воронку`;
+      $(`[data-add-ph="${scope}"]`).textContent = `Выберите ${l} приложение`;
+    }
+    // everything drawn once is no longer new
+    const all = [...Object.values(state.apps).flat(), ...state.general, ...Object.values(state.reserve).flatMap(r => r.apps)];
+    all.forEach(a => { a.isNew = false; });
+    Object.values(state.reserve).forEach(r => { r.isNew = false; });
   }
 
-  $('platforms').addEventListener('click', e => {
+  /* ---------- actions ---------- */
+  function listFor(owner) {
+    if (owner === 'general') return state.general;
+    if (owner.startsWith('r-')) return state.reserve[owner.slice(2)].apps;
+    return state.apps[owner];
+  }
+
+  document.addEventListener('click', e => {
     const b = e.target.closest('[data-act]');
-    if (!b) return;
-    const p = b.dataset.p, id = Number(b.dataset.id);
-    if (b.dataset.act === 'close') {
-      state.apps[p] = [];
+    if (!b || b.tagName === 'INPUT') return;
+    const act = b.dataset.act, p = b.dataset.p;
+
+    if (act === 'tab') { state.tabs[b.dataset.scope] = p; render(); return; }
+
+    if (act === 'add-app') {
+      const plat = state.tabs.main, list = state.apps[plat];
+      if (list.length >= MAX) return;
+      if (!state.order.includes(plat)) { state.order.push(plat); state.reserve[plat] = { open: false, apps: [] }; state.tabs['r-' + plat] = plat; }
+      const app = make(plat, nextFrom(CATALOG, 'main-' + plat, plat));
+      // screen 03: when the second app lands, both show the tracker link
+      if (list.length === 1 && !list[0].offer) { list[0].offer = DEMO_OFFER; app.offer = DEMO_OFFER; }
+      list.push(app);
+      render();
+      return;
+    }
+    if (act === 'close-platform') {
+      state.apps[p] = []; delete state.reserve[p];
       state.order = state.order.filter(x => x !== p);
-      render();
-    } else if (b.dataset.act === 'del') {
-      state.apps[p] = state.apps[p].filter(a => a.id !== id);
-      if (!state.apps[p].length) state.order = state.order.filter(x => x !== p);
-      render();
-    } else if (b.dataset.act === 'setup') {
-      openDrawer(p, id, b);
+      render(); return;
+    }
+    if (act === 'reserve-open') { state.reserve[p].open = true; state.reserve[p].isNew = true; render(); return; }
+    if (act === 'reserve-close') { state.reserve[p] = { open: false, apps: [] }; render(); return; }
+    if (act === 'add-reserve') {
+      const r = state.reserve[p], plat = state.tabs['r-' + p];
+      if (r.apps.length >= MAX) return;
+      r.apps.push(make(plat, nextFrom(RESERVE_CATALOG, 'r-' + p + plat, plat)));
+      render(); return;
+    }
+    if (act === 'add-general') {
+      const plat = state.tabs.general;
+      state.general = [make(plat, nextFrom(RESERVE_CATALOG, 'general-' + plat, plat))];   // one shared reserve for the funnel
+      render(); return;
+    }
+    if (act === 'del') {
+      const owner = b.dataset.owner, id = Number(b.dataset.id), list = listFor(owner);
+      const i = list.findIndex(a => a.id === id);
+      if (i >= 0) list.splice(i, 1);
+      if (!owner.startsWith('r-') && owner !== 'general' && !list.length) { state.order = state.order.filter(x => x !== owner); delete state.reserve[owner]; }
+      render(); return;
     }
   });
 
-  /* ---------- drawer (screen 04) ---------- */
-  let opener = null;
-  function renderReserve() {
-    const cfg = PLATFORMS[editing.platform];
-    $('reserve-list').innerHTML = draftReserve.map((r, i) => `<div class="reserve-item" style="${r.isNew ? '' : 'animation:none'}">
-      <span class="who"><span class="reserve-img"><img src="assets/app-s.png" alt="">${cfg.badge ? `<span class="badge"><img src="${cfg.badge}" alt=""></span>` : ''}</span>${SHORT_NAME}</span>
-      <button class="del" type="button" data-i="${i}" aria-label="Убрать из резерва"><img src="assets/imgDelete.svg" alt=""></button></div>`).join('');
-    draftReserve.forEach(r => { r.isNew = false; });
-  }
-  function openDrawer(p, id, from) {
-    const a = state.apps[p].find(x => x.id === id);
-    if (!a) return;
-    editing = { platform: p, id };
-    opener = from;
-    const l = PLATFORMS[p].label;
-    $('drawer-title').textContent = `Настройка приложения ${SHORT_NAME}`;
-    $('d-add-label').textContent = `Добавить ${l} приложение`;
-    $('d-add-placeholder').textContent = `Выберите ${l} приложение`;
-    // the drawer opens as on screen 04: one reserve app suggested if none is set yet
-    draftReserve = Array.from({ length: Math.max(a.reserve, 1) }, () => ({ isNew: false }));
-    renderReserve();
-    $('d-offer').value = a.offer;
-    $('scrim').classList.add('is-open');
-    $('drawer').classList.add('is-open');
-    document.body.classList.add('is-locked');
-    setTimeout(() => $('d-offer').focus({ preventScroll: true }), 300);
-  }
-  function closeDrawer() {
-    if (!editing) return;
-    editing = null;
-    $('scrim').classList.remove('is-open');
-    $('drawer').classList.remove('is-open');
-    document.body.classList.remove('is-locked');
-    opener?.focus({ preventScroll: true });
-  }
-  $('d-add').addEventListener('click', () => { if (draftReserve.length < 10) { draftReserve.push({ isNew: true }); renderReserve(); } });
-  $('reserve-list').addEventListener('click', e => {
-    const b = e.target.closest('[data-i]');
-    if (!b) return;
-    draftReserve.splice(Number(b.dataset.i), 1);
-    renderReserve();
+  // offer links are plain inputs; keep their values in state so re-renders don't lose them
+  document.addEventListener('input', e => {
+    const t = e.target;
+    if (t.dataset.act !== 'offer') return;
+    const a = listFor(t.dataset.owner).find(x => x.id === Number(t.dataset.id));
+    if (a) a.offer = t.value;
   });
-  $('d-save').addEventListener('click', () => {
-    if (!editing) return;
-    const a = state.apps[editing.platform].find(x => x.id === editing.id);
-    if (a) { a.reserve = draftReserve.length; a.offer = $('d-offer').value.trim(); }
-    render();
-    closeDrawer();
-  });
-  $('d-cancel').addEventListener('click', closeDrawer);
-  $('scrim').addEventListener('click', closeDrawer);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
 
   /* ---------- small controls ---------- */
   document.querySelectorAll('.domain-tab').forEach(t => t.addEventListener('click', () => {
     document.querySelectorAll('.domain-tab').forEach(o => { o.classList.toggle('is-active', o === t); o.setAttribute('aria-selected', String(o === t)); });
   }));
-  $('sw-geo').addEventListener('click', e => { const s = e.currentTarget; s.setAttribute('aria-checked', String(s.getAttribute('aria-checked') !== 'true')); });
+  document.getElementById('sw-geo').addEventListener('click', e => { const s = e.currentTarget; s.setAttribute('aria-checked', String(s.getAttribute('aria-checked') !== 'true')); });
 
-  setTab('ios');
+  render();
 })();
 </script>
 </body>
