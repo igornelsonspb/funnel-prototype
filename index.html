@@ -153,6 +153,7 @@ button.control:hover { border-color: var(--border-hover); }
 .reserve-apps { display: flex; flex-direction: column; gap: 12px; }
 .reserve-apps:empty { display: none; }
 .general-apps:empty { display: none; }
+.general-card:not([hidden]) { animation: rise 0.45s var(--ease); }
 
 /* ---------- responsive ---------- */
 @media (max-width: 960px) {
@@ -259,7 +260,7 @@ button.control:hover { border-color: var(--border-hover); }
           <div class="platforms" id="platforms"></div>
         </section>
 
-        <section class="card">
+        <section class="card general-card" id="general-card" hidden>
           <div class="card-head">
             <h2>Резервное приложение</h2>
             <p>Общее резервное приложение для воронки</p>
@@ -384,6 +385,10 @@ button.control:hover { border-color: var(--border-hover); }
         </div>
       </section>`;
     }).join('');
+    // the shared reserve only makes sense once the funnel has at least one app
+    const hasApps = state.order.length > 0;
+    if (!hasApps) state.general = [];
+    $('#general-card').hidden = !hasApps;
     $('#general-apps').innerHTML = state.general.map(a => appCardHTML(a, { owner: 'general' })).join('');
 
     for (const scope of ['main', 'general']) {
