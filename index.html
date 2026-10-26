@@ -161,7 +161,7 @@ button.control:hover { border-color: var(--border-hover); }
 .flow { --line: var(--border-hover); --line-soft: var(--border-on-table); display: flex; flex-direction: column; align-items: center; min-width: min-content; padding-bottom: 4px; }
 .fnode { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 8px; background: var(--table-header); font-size: 14px; line-height: 1.3; white-space: nowrap; max-width: 100%; box-sizing: border-box; }
 .fnode .mi { color: var(--fg); }
-.fnode.is-key { border: 1px solid var(--accent); }
+.fnode.is-key { border: 1px solid var(--fg); }
 .fnode.is-soft { background: none; border: 1px dashed var(--line-soft); color: var(--text-default); }
 .fnode.is-warn { background: none; border: 1px dashed var(--line-soft); color: var(--text-disabled); }
 .fnode small { color: var(--text-default); font-size: 12px; }
@@ -169,45 +169,43 @@ button.control:hover { border-color: var(--border-hover); }
 .fnode .nm { overflow: hidden; text-overflow: ellipsis; }
 .fnode .pct { margin-left: auto; padding-left: 8px; color: var(--accent); font-variant-numeric: tabular-nums; }
 
-/* vertical arrow; .is-dashed for fallbacks; label sits to the right of the line */
-.farrow { position: relative; width: 2px; height: 28px; margin: 2px 0 10px; background: var(--line); flex: none; }
-.farrow::after { content: ""; position: absolute; left: 50%; bottom: -7px; transform: translateX(-50%); border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 7px solid var(--line); }
-.farrow.is-dashed { background: repeating-linear-gradient(to bottom, var(--line-soft) 0 4px, transparent 4px 8px); }
-.farrow.is-dashed::after { border-top-color: var(--line-soft); }
+/* vertical arrow: line, optional label in a gap in the middle, line with head. .is-dashed for fallbacks */
+.farrow { display: flex; flex-direction: column; align-items: center; flex: none; margin: 10px 0 18px; }
+.farrow .seg { position: relative; width: 2px; height: 22px; background: var(--line); flex: none; }
+.farrow .seg:only-child { height: 36px; }
+.farrow .seg.head::after { content: ""; position: absolute; left: 50%; bottom: -7px; transform: translateX(-50%); border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 7px solid var(--line); }
+.farrow.is-dashed .seg { background: repeating-linear-gradient(to bottom, var(--line-soft) 0 4px, transparent 4px 8px); }
+.farrow.is-dashed .seg.head::after { border-top-color: var(--line-soft); }
 .farrow.no-head { margin-bottom: 0; }
-.farrow.no-head::after { display: none; }
-.farrow .lbl { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--text-default); white-space: nowrap; }
+.farrow .lbl { padding: 6px 0; font-size: 12px; line-height: 1.3; color: var(--text-default); white-space: nowrap; }
 
 /* geo step with a side branch to the whitepage */
 .fgeo { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; width: 100%; }
 .fgeo > .fnode { grid-column: 2; }
 .fbranch { grid-column: 3; display: flex; align-items: center; min-width: 0; }
-.harrow { position: relative; width: 56px; height: 2px; margin: 0 10px 0 2px; background: repeating-linear-gradient(to right, var(--line-soft) 0 4px, transparent 4px 8px); flex: none; }
-.harrow::after { content: ""; position: absolute; right: -7px; top: 50%; transform: translateY(-50%); border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 7px solid var(--line-soft); }
-.harrow .lbl { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); font-size: 12px; color: var(--text-default); white-space: nowrap; }
+.harrow { display: flex; align-items: center; flex: none; margin: 0 12px 0 4px; }
+.harrow .hseg { position: relative; width: 20px; height: 2px; background: repeating-linear-gradient(to right, var(--line-soft) 0 4px, transparent 4px 8px); flex: none; }
+.harrow .hseg.head { margin-right: 7px; }
+.harrow .hseg.head::after { content: ""; position: absolute; right: -7px; top: 50%; transform: translateY(-50%); border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 7px solid var(--line-soft); }
+.harrow .lbl { padding: 0 8px; font-size: 12px; color: var(--text-default); white-space: nowrap; }
 
 /* split into one column per platform */
-.fsplit { --gap: 16px; position: relative; display: grid; grid-template-columns: repeat(var(--n), minmax(200px, 1fr)); gap: var(--gap); width: 100%; }
+.fsplit { --gap: 24px; position: relative; display: grid; grid-template-columns: repeat(var(--n), minmax(200px, 1fr)); gap: var(--gap); width: 100%; }
 .fsplit::before { content: ""; position: absolute; top: 0; height: 2px; background: var(--line);
   left: calc((100% - (var(--n) - 1) * var(--gap)) / var(--n) / 2); right: calc((100% - (var(--n) - 1) * var(--gap)) / var(--n) / 2); }
 .fcol { display: flex; flex-direction: column; align-items: center; min-width: 0; }
-.fcol .farrow:first-child { height: 22px; margin-top: 0; }
-.fstack { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.fcol .farrow:first-child { margin-top: 0; }
+.fcol .farrow:first-child .seg:only-child { height: 26px; }
+.fstack { display: flex; flex-direction: column; gap: 10px; width: 100%; }
 .fstack .fnode { width: 100%; }
 .fcol.is-other .fnode { color: var(--text-default); }
 @media (max-width: 640px) {
   .fgeo { grid-template-columns: auto; justify-items: center; }
   .fgeo > .fnode, .fbranch { grid-column: 1; }
   .fbranch { margin-top: 8px; }
-  .harrow { width: 32px; }
   .harrow .lbl { display: none; }
 }
 
-.flow-legend { display: flex; flex-wrap: wrap; gap: 8px 24px; color: var(--text-default); font-size: 12px; }
-.flow-legend span { display: inline-flex; align-items: center; gap: 8px; }
-.flow-legend i { display: block; width: 24px; height: 2px; }
-.lg-solid { background: var(--border-hover); }
-.lg-dashed { background: repeating-linear-gradient(to right, var(--border-on-table) 0 4px, transparent 4px 8px); }
 
 /* ---------- responsive ---------- */
 @media (max-width: 960px) {
@@ -330,13 +328,8 @@ button.control:hover { border-color: var(--border-hover); }
         <section class="card flow-card" id="flow-card" hidden>
           <div class="card-head">
             <h2>Путь трафика</h2>
-            <p>Куда попадёт клик по ссылке воронки и что произойдёт, если приложение недоступно</p>
           </div>
           <div class="flow-scroll"><div class="flow" id="flow"></div></div>
-          <div class="flow-legend">
-            <span><i class="lg-solid"></i>Основной путь</span>
-            <span><i class="lg-dashed"></i>Если приложение недоступно</span>
-          </div>
         </section>
 
         <section class="card actions-card">
@@ -435,7 +428,10 @@ button.control:hover { border-color: var(--border-hover); }
 
   /* ---------- traffic path ---------- */
   const shortName = n => n.replace(/^Слот:\s*/, '');
-  const arrow = (label = '', cls = '') => `<div class="farrow ${cls}">${label ? `<span class="lbl">${label}</span>` : ''}</div>`;
+  const arrow = (label = '', cls = '') => {
+    const head = cls.includes('no-head') ? '' : ' head';
+    return `<div class="farrow ${cls}">${label ? `<i class="seg"></i><span class="lbl">${label}</span>` : ''}<i class="seg${head}"></i></div>`;
+  };
   const appNode = (a, pct) => `<div class="fnode"><img class="thumb" src="${a.img}" alt=""><span class="nm">${esc(shortName(a.name))}</span>${pct !== undefined ? `<span class="pct">${pct}%</span>` : ''}</div>`;
 
   function flowHTML() {
@@ -476,7 +472,7 @@ button.control:hover { border-color: var(--border-hover); }
       ${arrow()}
       <div class="fgeo">
         <div class="fnode">Проверка гео</div>
-        <div class="fbranch"><div class="harrow"><span class="lbl">не прошёл</span></div><div class="fnode is-soft">Whitepage</div></div>
+        <div class="fbranch"><div class="harrow"><i class="hseg"></i><span class="lbl">не прошёл</span><i class="hseg head"></i></div><div class="fnode is-soft">Whitepage</div></div>
       </div>
       ${arrow('гео разрешено')}
       <div class="fnode">Определение платформы</div>
